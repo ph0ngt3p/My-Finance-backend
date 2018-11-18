@@ -1,0 +1,48 @@
+version: '3'
+
+networks:
+  backend:
+
+volumes:
+  uwsgi-sock:
+  mysql-data:
+
+services:
+  mysql:
+    image: bitnami/mysql:5.7-ol-7
+    networks:
+      - backend
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_USER=user
+      - MYSQL_DATABASE=my_finance
+    volumes:
+      - mysql-data:/bitnami/mysql/data
+
+  app:
+    image: registry.gitlab.com/tuandzung/my-finance:latest
+    networks:
+      - backend
+    depends_on:
+      - mysql
+    volumes:
+      - uwsgi-sock:/tmp
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=user
+      - DB_NAME=my_finance
+      - SECRET_KEY=2a94d1e631eb93ffc51041356cced91d4b01c827c66b4a15
+      - AUTH_TOKEN_EXPIRY_DAYS=30
+    entrypoint: ['uwsgi', '--ini', '/etc/uwsgi/uwsgi.ini']
+
+  nginx:
+    image: 'nginx:1.14.1-alpine'
+    ports:
+      - 80:80
+    networks:
+      - backend
+    depends_on:
+      - app
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - uwsgi-sock:/tmp
