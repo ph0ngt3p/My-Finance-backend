@@ -17,7 +17,7 @@ services:
       - MYSQL_USER=user
       - MYSQL_DATABASE=my_finance
     volumes:
-      - mysql-data:/bitnami/mysql/data
+      - ~/.docker-persistence/bitnami/mysql/data:/bitnami/mysql/data
 
   app:
     image: registry.gitlab.com/tuandzung/my-finance:latest
