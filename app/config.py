@@ -1,7 +1,7 @@
 import os
-from dotenv import load_dotenv, find_dotenv
 
 if os.getenv('FLASK_ENV') == 'development':
+    from dotenv import load_dotenv, find_dotenv
     load_dotenv(find_dotenv())
 
 db_host = os.getenv('DB_HOST', 'localhost')

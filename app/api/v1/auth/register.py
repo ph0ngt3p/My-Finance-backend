@@ -7,11 +7,33 @@ import re
 
 
 class Register(MethodView):
-    """
-    View function to register a user via the api
-    """
-
     def post(self):
+        """
+        @api {POST} /api/v1/auth/register Register
+        @apiName Register
+        @apiGroup Authentication
+        @apiDescription Register a user, generate their token and add them to the database
+
+        @apiParam {String} email Email of the user
+        @apiParam {String} password Password of the user
+
+        @apiSuccess (Success) {String} auth_token Auth token to be used for requesting
+        @apiSuccess (Success) {String} message Message
+        @apiSuccess (Success) {String} status Status
+
+        @apiSampleRequest /api/v1/auth/register
+
+        @apiExample cURL example
+        $ curl -H "Content-Type: application/json" -X POST -d '{"email": "tep@gmail.com", "password": "password"}' https://ec2-35-153-68-36.compute-1.amazonaws.com/api/v1/auth/register
+
+        @apiSuccessExample {json} Success-Response:
+            HTTP/1.0 200 OK
+            {
+                "auth_token": "some random sheet",
+                "message": "Successfully registered",
+                "status": "success"
+            }
+        """
         """
         Register a user, generate their token and add them to the database
         :return: Json Response with the user`s token

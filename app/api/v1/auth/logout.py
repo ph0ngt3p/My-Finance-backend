@@ -5,14 +5,36 @@ from app.api.general_helpers import response
 
 
 class Logout(MethodView):
-    """
-    Class to log out a user
-    """
-
     def post(self):
         """
-        Try to logout a user using a token
-        :return:
+        @api {POST} /api/v1/auth/logout Logout
+        @apiName Logout
+        @apiGroup Authentication
+        @apiDescription Logout a user and blacklist the auth token.
+
+        @apiHeader {String} Authorization Users auth token
+
+        @apiHeaderExample {json} Header-Example:
+        {
+            "Authorization": "Bearer {auth_token_here}"
+        }
+
+        @apiParam {Object} . Nothing is required here
+
+        @apiSuccess (Success) {String} message Message
+        @apiSuccess (Success) {String} status Status
+
+        @apiSampleRequest /api/v1/auth/logout
+
+        @apiExample cURL example
+        $ curl -H "Content-Type: application/json" -H "Authorization": "Bearer {auth_token_here}" -X POST -d '{}' https://ec2-35-153-68-36.compute-1.amazonaws.com/api/v1/auth/logout
+
+        @apiSuccessExample {json} Success-Response:
+            HTTP/1.0 200 OK
+            {
+                "message": "Successfully logged out",
+                "status": "success"
+            }
         """
         auth_header = request.headers.get('Authorization')
         if auth_header:
