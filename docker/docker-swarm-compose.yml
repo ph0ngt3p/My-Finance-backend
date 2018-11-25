@@ -40,7 +40,7 @@ services:
         constraints: [node.role == manager]
 
   app:
-    image: 748977760035.dkr.ecr.us-east-1.amazonaws.com/my-finance-backend:0.0.4
+    image: 748977760035.dkr.ecr.us-east-1.amazonaws.com/my-finance-backend:0.0.6
     networks:
       - backend
     depends_on:

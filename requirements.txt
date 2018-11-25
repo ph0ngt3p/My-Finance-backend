@@ -6,7 +6,5 @@ SQLAlchemy==1.2.14
 Flask-Migrate==2.3.0
 python-dotenv==0.9.1
 Flask-Bcrypt==0.7.1
-Flask-Script==2.0.6
 PyJWT==1.6.4
-flask-apidoc==1.2.0
 nose2==0.8.0

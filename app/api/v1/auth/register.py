@@ -1,7 +1,7 @@
 from flask import request
 from flask.views import MethodView
 from app.models import User
-from api.v1.auth.auth_helpers import response_auth
+from app.api.v1.auth.auth_helpers import response_auth
 from app.api.general_helpers import response
 import re
 
