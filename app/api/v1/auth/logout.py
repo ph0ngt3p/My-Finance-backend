@@ -27,7 +27,7 @@ class Logout(MethodView):
         @apiSampleRequest /api/v1/auth/logout
 
         @apiExample cURL example
-        $ curl -H "Content-Type: application/json" -H "Authorization": "Bearer {auth_token_here}" -X POST -d '{}' https://ec2-35-153-68-36.compute-1.amazonaws.com/api/v1/auth/logout
+        $ curl -H "Content-Type: application/json" -H "Authorization": "Bearer {auth_token_here}" -X POST -d '{}' http://ec2-35-153-68-36.compute-1.amazonaws.com/api/v1/auth/logout
 
         @apiSuccessExample {json} Success-Response:
             HTTP/1.0 200 OK
@@ -39,14 +39,16 @@ class Logout(MethodView):
         auth_header = request.headers.get('Authorization')
         if auth_header:
             try:
-                auth_token = auth_header.split(' ')[1]
-            except IndexError:
+                scheme, auth_token = auth_header.split(' ')
+                if scheme != 'Bearer':
+                    raise ValueError
+            except ValueError:
                 return response('failed', 'Provide a valid auth token', 403)
             else:
                 decoded_token_response = User.decode_auth_token(auth_token)
                 if not isinstance(decoded_token_response, str):
-                    token = BlacklistedToken(auth_token)
+                    token = BlacklistedToken.create(auth_token)
                     token.blacklist()
                     return response('success', 'Successfully logged out', 200)
-                return response('failed', decoded_token_response, 401)
+                return response('failed', decoded_token_response, 400)
         return response('failed', 'Provide an authorization header', 403)

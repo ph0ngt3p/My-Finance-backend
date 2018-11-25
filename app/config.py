@@ -9,7 +9,8 @@ db_user = os.getenv('DB_USER', 'root')
 db_name = os.getenv('DB_NAME', 'my_finance')
 db_pass = os.getenv('DB_PASS', '')
 db_string = 'mysql+pymysql://{}:{}@{}/{}'.format(db_user, db_pass, db_host, db_name)
-db_test_string = db_string + '_test'
+db_test_name = db_name + '_test'
+db_test_string = 'mysql+pymysql://{}:{}@{}/{}'.format(db_user, db_pass, db_host, db_test_name)
 
 
 class Config:
@@ -20,3 +21,14 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DB_URL', db_string)
     AUTH_TOKEN_EXPIRY_DAYS = int(os.getenv('AUTH_TOKEN_EXPIRY_DAYS', 1))
     AUTH_TOKEN_EXPIRY_SECONDS= int(os.getenv('AUTH_TOKEN_EXPIRY_SECONDS', 30))
+
+
+class TestConfig:
+    DEBUG = True
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.getenv('DB_URL_TEST', db_test_string)
+    SECRET_KEY = 'secret'
+    BCRYPT_HASH_PREFIX = 4
+    AUTH_TOKEN_EXPIRY_DAYS = 0
+    AUTH_TOKEN_EXPIRY_SECONDS = 3
+    AUTH_TOKEN_EXPIRATION_TIME_DURING_TESTS = 5

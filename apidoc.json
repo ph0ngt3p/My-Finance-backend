@@ -1,8 +1,8 @@
 {
   "name": "My Finance API",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "My Finance",
   "title": "My Finance API Documentation",
-  "url" : "https://ec2-35-153-68-36.compute-1.amazonaws.com",
-  "sampleUrl" : "https://ec2-35-153-68-36.compute-1.amazonaws.com"
+  "url" : "http://ec2-35-153-68-36.compute-1.amazonaws.com",
+  "sampleUrl" : "http://ec2-35-153-68-36.compute-1.amazonaws.com"
 }

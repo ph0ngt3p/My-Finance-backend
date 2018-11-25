@@ -19,6 +19,11 @@ class User(db.Model):
         self.password = bcrypt.generate_password_hash(password, app.config.get('BCRYPT_LOG_ROUNDS')) \
             .decode('utf-8')
 
+    @staticmethod
+    def create(email, password):
+        user = User(email, password)
+        return user
+
     def save(self):
         """
         Persist the user in the database
@@ -27,9 +32,9 @@ class User(db.Model):
         """
         db.session.add(self)
         db.session.commit()
-        return self.encode_auth_token(self.id)
+        return self.encode_auth_token()
 
-    def encode_auth_token(self, user_id):
+    def encode_auth_token(self):
         """
         Encode the Auth token
         :param user_id: User's Id
@@ -42,7 +47,7 @@ class User(db.Model):
                     seconds=app.config.get('AUTH_TOKEN_EXPIRY_SECONDS')
                 ),
                 'iat': datetime.datetime.utcnow(),
-                'sub': user_id
+                'sub': self.id
             }
             return jwt.encode(
                 payload,
@@ -63,12 +68,10 @@ class User(db.Model):
             payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms='HS256')
             is_token_blacklisted = BlacklistedToken.check_blacklist(token)
             if is_token_blacklisted:
-                return 'Token was blacklisted, please login again'
+                return 'Token was blacklisted, please sign in again'
             return payload['sub']
         except jwt.ExpiredSignatureError:
             return 'Signature expired, Please sign in again'
-        except jwt.InvalidTokenError:
-            return 'Invalid token. Please sign in again'
 
     @staticmethod
     def get_by_id(user_id):

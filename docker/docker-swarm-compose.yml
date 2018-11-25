@@ -1,0 +1,120 @@
+version: '3'
+
+networks:
+  backend:
+
+volumes:
+  db-data:
+  uwsgi-sock:
+
+services:
+  mysql:
+    image: mysql:5.7.24
+    networks:
+      - backend
+    environment:
+      - MYSQL_ROOT_PASSWORD=zXFgCrqwbE5BKdxD
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=KWHSZhpFwmMfNp3T
+      - MYSQL_DATABASE=my_finance
+    volumes:
+      - db-data:/var/lib/mysql
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      # service resource management
+      resources:
+        # Hard limit - Docker does not allow to allocate more
+        limits:
+          cpus: '0.9'
+          memory: 1024M
+        # Soft limit - Docker makes best effort to return to it
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      placement:
+        constraints: [node.role == manager]
+
+  app:
+    image: 748977760035.dkr.ecr.us-east-1.amazonaws.com/my-finance-backend:0.0.4
+    networks:
+      - backend
+    depends_on:
+      - mysql
+    volumes:
+      - uwsgi-sock:/tmp
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=user
+      - DB_PASS=KWHSZhpFwmMfNp3T
+      - DB_NAME=my_finance
+      - SECRET_KEY=2a94d1e631eb93ffc51041356cced91d4b01c827c66b4a15
+      - AUTH_TOKEN_EXPIRY_DAYS=30
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels:
+        - "APP=MY_FINANCE"
+      # service resource management
+      resources:
+        # Hard limit - Docker does not allow to allocate more
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        # Soft limit - Docker makes best effort to return to it
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      # service restart policy
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      # service update configuration
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      # placement constraint - in this case on 'worker' nodes only
+      placement:
+        constraints: [node.role == worker]
+
+  nginx:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    networks:
+      - backend
+    depends_on:
+      - app
+    volumes:
+      - uwsgi-sock:/tmp
+    deploy:
+      # service resource management
+      replicas: 1
+      resources:
+        # Hard limit - Docker does not allow to allocate more
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        # Soft limit - Docker makes best effort to return to it
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      # service restart policy
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == worker]

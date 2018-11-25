@@ -16,6 +16,11 @@ class BlacklistedToken(db.Model):
         self.token = token
         self.blacklisted_on = datetime.datetime.now()
 
+    @staticmethod
+    def create(token):
+        token = BlacklistedToken(token)
+        return token
+
     def blacklist(self):
         """
         Persist Blacklisted token in the database
