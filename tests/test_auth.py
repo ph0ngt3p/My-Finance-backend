@@ -124,7 +124,7 @@ with such.A('authentication system') as it:
             res_body = json.loads(response.get_data(as_text=True))
 
             expected_response = {
-                'message': 'Content-Type must be appication/json',
+                'message': 'Content-Type must be application/json',
                 'status': 'failed'
             }
 
@@ -278,7 +278,7 @@ with such.A('authentication system') as it:
             res_body = json.loads(response.get_data(as_text=True))
 
             expected_response = {
-                'message': 'Missing, or wrong email format, or wrong password format (must be at least 5 characters and contain no spaces)',
+                'message': 'Missing, wrong email format, or wrong password format (at least 5 characters and contain no spaces)',
                 'status': 'failed'
             }
 
@@ -297,7 +297,7 @@ with such.A('authentication system') as it:
             res_body = json.loads(response.get_data(as_text=True))
 
             expected_response = {
-                'message': 'Missing, or wrong email format, or wrong password format (must be at least 5 characters and contain no spaces)',
+                'message': 'Missing, wrong email format, or wrong password format (at least 5 characters and contain no spaces)',
                 'status': 'failed'
             }
 
@@ -316,7 +316,7 @@ with such.A('authentication system') as it:
             res_body = json.loads(response.get_data(as_text=True))
 
             expected_response = {
-                'message': 'Missing, or wrong email format, or wrong password format (must be at least 5 characters and contain no spaces)',
+                'message': 'Missing, wrong email format, or wrong password format (at least 5 characters and contain no spaces)',
                 'status': 'failed'
             }
 
@@ -332,9 +332,11 @@ with such.A('authentication system') as it:
 
         @it.should('return 200, log user out and blacklist the token if provided a correct token in the Authorization header')
         @fix_case
+        @patch('app.models.User.get_by_id')
         @patch('app.models.User.decode_auth_token')
         @patch('app.models.BlacklistedToken.create')
-        def test(mock_create_blacklisted_token, mock_decode_auth_token, case=None):
+        def test(mock_create_blacklisted_token, mock_decode_auth_token, mock_get_user_by_id, case=None):
+            mock_get_user_by_id.return_value = it.mock_user
             mock_decode_auth_token.return_value = 1
             mock_create_blacklisted_token.return_value = it.blacklisted_token
             it.blacklisted_token.blacklist = Mock(return_value=None)
@@ -353,6 +355,7 @@ with such.A('authentication system') as it:
                 'status': 'success'
             }
 
+            mock_get_user_by_id.assert_called_once_with(int(it.mock_id))
             mock_decode_auth_token.assert_called_once_with(it.mock_jwt_token)
             mock_create_blacklisted_token.assert_called_once_with(it.mock_jwt_token)
             it.blacklisted_token.blacklist.assert_called_once()

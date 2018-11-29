@@ -21,6 +21,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DB_URL', db_string)
     AUTH_TOKEN_EXPIRY_DAYS = int(os.getenv('AUTH_TOKEN_EXPIRY_DAYS', 1))
     AUTH_TOKEN_EXPIRY_SECONDS= int(os.getenv('AUTH_TOKEN_EXPIRY_SECONDS', 30))
+    ITEMS_PER_PAGE = int(os.getenv('ITEMS_PER_PAGE', 10))
 
 
 class TestConfig:
