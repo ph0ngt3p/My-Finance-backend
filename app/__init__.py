@@ -29,24 +29,25 @@ db = SQLAlchemy(app)
 # Initialize Flask Migrate
 migrate = Migrate(app, db)
 
+
 @app.cli.command()
 @option('--input', default='app')
 @option('--output', default='docker/nginx/apidoc')
 @option('--template', default=None)
 def apidoc(input, output, template):
-	cmd = ['apidoc']
-	if input:
-	    cmd.append('--input')
-	    cmd.append(input)
-	if output:
-	    cmd.append('--output')
-	    cmd.append(output)
-	if template:
-	    cmd.append('--template')
-	    cmd.append(template)
-	p = subprocess.Popen(cmd)
-	p.communicate()
-	return p.returncode
+    cmd = ['apidoc']
+    if input:
+        cmd.append('--input')
+        cmd.append(input)
+    if output:
+        cmd.append('--output')
+        cmd.append(output)
+    if template:
+        cmd.append('--template')
+        cmd.append(template)
+    p = subprocess.Popen(cmd)
+    p.communicate()
+    return p.returncode
 
 
 # Error handlers
@@ -54,5 +55,7 @@ from app.api import error_handlers
 
 # Register blue prints
 from app.api.v1.auth import auth
+from app.api.v1.account import account
 
 app.register_blueprint(auth, url_prefix='/api/v1')
+app.register_blueprint(account, url_prefix='/api/v1')

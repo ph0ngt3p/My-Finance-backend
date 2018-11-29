@@ -36,10 +36,13 @@ RUN apk add --no-cache libcrypto1.0 libssl1.0 && \
     rm -rf /wheels
 
 COPY uwsgi.ini /etc/uwsgi/
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+ENTRYPOINT ['docker-entrypoint.sh']
 
 # Copy the code
 COPY . .
 
-CMD uwsgi --ini /etc/uwsgi/uwsgi.ini
+CMD ['uwsgi', '--ini', '/etc/uwsgi/uwsgi.ini']
 
 EXPOSE 5000

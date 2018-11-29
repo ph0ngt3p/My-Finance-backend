@@ -1,13 +1,16 @@
-from flask import request
+from flask import request, _request_ctx_stack
 from flask.views import MethodView
 from app.models import BlacklistedToken, User
-from app.api.general_helpers import response
+from app.api.general_helpers import response, token_required
 
 
 class Logout(MethodView):
+    decorators = [token_required]
+
     def post(self):
         """
         @api {POST} /api/v1/auth/logout Logout
+        @apiVersion 0.0.1
         @apiName Logout
         @apiGroup Authentication
         @apiDescription Logout a user and blacklist the auth token.
@@ -36,19 +39,10 @@ class Logout(MethodView):
                 "status": "success"
             }
         """
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            try:
-                scheme, auth_token = auth_header.split(' ')
-                if scheme != 'Bearer':
-                    raise ValueError
-            except ValueError:
-                return response('failed', 'Provide a valid auth token', 403)
-            else:
-                decoded_token_response = User.decode_auth_token(auth_token)
-                if not isinstance(decoded_token_response, str):
-                    token = BlacklistedToken.create(auth_token)
-                    token.blacklist()
-                    return response('success', 'Successfully logged out', 200)
-                return response('failed', decoded_token_response, 400)
-        return response('failed', 'Provide an authorization header', 403)
+        ctx = _request_ctx_stack.top
+        auth_token = ctx.token
+        token = BlacklistedToken.create(auth_token)
+        token.blacklist()
+        ctx.user = None
+        ctx.token = None
+        return response('success', 'Successfully logged out', 200)

@@ -13,6 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    accounts = db.relationship('Account', backref='account', lazy='dynamic')
 
     def __init__(self, email, password):
         self.email = email
@@ -72,6 +73,8 @@ class User(db.Model):
             return payload['sub']
         except jwt.ExpiredSignatureError:
             return 'Signature expired, Please sign in again'
+        except jwt.InvalidSignatureError:
+            return 'Signature verification failed'
 
     @staticmethod
     def get_by_id(user_id):
@@ -100,3 +103,12 @@ class User(db.Model):
         self.password = bcrypt.generate_password_hash(new_password, app.config.get('BCRYPT_LOG_ROUNDS')) \
             .decode('utf-8')
         db.session.commit()
+
+    def get_paginated_accounts(self, page):
+        """
+        Get a user's accounts and also paginate the results.
+        :param page: Page number
+        :return: Accounts of the user.
+        """
+        paginated_accounts_list = self.accounts.paginate(page=page, per_page=app.config['ITEMS_PER_PAGE'], error_out=False)
+        return paginated_accounts_list

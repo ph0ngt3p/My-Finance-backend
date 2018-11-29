@@ -2,15 +2,18 @@ from app import bcrypt
 from flask import request
 from flask.views import MethodView
 from app.models import User
-from app.api.v1.auth.auth_helpers import response_auth
-from app.api.general_helpers import response
+from app.api.v1.auth.response_helpers import response_auth
+from app.api.general_helpers import response, check_content_type
 import re
 
 
 class Login(MethodView):
+    decorators = [check_content_type]
+
     def post(self):
         """
         @api {POST} /api/v1/auth/login Login
+        @apiVersion 0.0.1
         @apiName Login
         @apiGroup Authentication
         @apiDescription Login a user if the supplied credentials are correct.
@@ -37,14 +40,12 @@ class Login(MethodView):
                 "status": "success"
             }
         """
-        if request.content_type == 'application/json':
-            post_data = request.get_json()
-            email = post_data.get('email')
-            password = post_data.get('password')
-            if re.match(r'[^@]+@[^@]+\.[^@]+', email) and len(password) > 4 and not bool(re.search(' +', password)):
-                user = User.get_by_email(email)
-                if user and bcrypt.check_password_hash(user.password, password):
-                    return response_auth('success', 'Successfully logged in', email, user.encode_auth_token(), 200)
-                return response('failed', 'User does not exist or password is incorrect', 400)
-            return response('failed', 'Missing or wrong email or password format', 400)
-        return response('failed', 'Content-Type must be appication/json', 400)
+        post_data = request.get_json()
+        email = post_data.get('email')
+        password = post_data.get('password')
+        if re.match(r'[^@]+@[^@]+\.[^@]+', email) and len(password) > 4 and not bool(re.search(' +', password)):
+            user = User.get_by_email(email)
+            if user and bcrypt.check_password_hash(user.password, password):
+                return response_auth('success', 'Successfully logged in', email, user.encode_auth_token(), 200)
+            return response('failed', 'User does not exist or password is incorrect', 400)
+        return response('failed', 'Missing or wrong email or password format', 400)
